@@ -2,8 +2,6 @@
 #include <math.h>
 #include "main.h"
 
-// this is a git test
-
 int main(int argc, char* argv[])
 {
 	char inputText[] = "Will Bur";
