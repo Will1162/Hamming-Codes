@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[])
 {
-	char inputText[] = "ABCD";
+	char inputText[] = "0000";
 
 	int lengthBits = 16;
 
@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 
 	for (int i = inputSize; i < bitsFree; i++)
 	{
-		inputBits[i] = 7;
+		inputBits[i] = 0;
 	}
 
 	printf("Data bits\n");
@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
 	}
 	printf("\n\n");
 
-	printf("Bit mask\n");
+	printf("Length Bits\n");
 	for (int i = nextPow2 - lengthBits; i < nextPow2; i++)
 	{
 		int bitMask = ((int)pow(2, lengthBits - 1) >> (i % lengthBits));
@@ -78,27 +78,128 @@ int main(int argc, char* argv[])
 		if ((i != 0) && ((i & (i - 1)) != 0))
 		{
 			output[i] = inputBits[count];
-			printf("Other: %i, %i, %i\n", i, output[i], inputBits[count]);
+			//printf("Other: %i, %i, %i\n", i, output[i], inputBits[count]);
 			count++;
 		}
 		else if ((i != 0) && ((i & (i - 1)) == 0))
 		{
 			output[i] = 2;
-			printf(" Pow2: %i, %i\n", i, output[i]);
+			//printf(" Pow2: %i, %i\n", i, output[i]);
 		}
 		else if (i == 0)
 		{
 			output[i] = 3;
-			printf(" Zero: %i, %i\n", i, output[i]);
+			//printf(" Zero: %i, %i\n", i, output[i]);
 		}
 	}
-	printf("\nCount: %i\n", count);
+	for (int i = nextPow2 - lengthBits; i < nextPow2; i++)
+	{
+		int bitMask = ((int)pow(2, lengthBits - 1) >> (i % lengthBits));
+		output[i] = (inputSize & bitMask) / bitMask;
+	}
+
+	printf("Output step 1:\n");
 
 	for (int i = 0; i < nextPow2; i++)
 	{
 		printf("%i", output[i]);
+		if (i % 32 == 31)
+		{
+			printf("\n");
+		}
+		else if (i % 8 == 7)
+		{
+			printf(" ");
+		}
 	}
 
+
+
+
+	printf("\nTemp step\n");
+
+	int logThing = 0;
+	count = 0;
+	for (int i = 0; i < nextPow2; i++)
+	{
+		if (output[i] == 1 && count == 0 && (i != 0) && ((i & (i - 1)) != 0))
+		{
+			logThing = i;
+			count++;
+		}
+		else if (output[i] == 1 && (i != 0) && ((i & (i - 1)) != 0))
+		{
+			logThing = logThing ^ output[i];
+		}
+	}
+
+	printf("AAA: %i\n", logThing);
+
+
+	// ! fix funky ECC calculations
+
+
+
+
+
+
+
+
+
+
+
+
+	printf("\nOutput step 2:\n");
+	for (int i = 0; i < nextPow2; i++)
+	{
+		if ((i != 0) && ((i & (i - 1)) == 0))
+		{
+			count = 0;
+			for (int j = 0; j < nextPow2; j++)
+			{
+				if (((j & i) == i) && j != i)
+				{
+					if (output[j] == 1)
+					{
+						count++;
+					}
+				}
+			}
+
+			output[i]  = count % 2;
+		}
+	}
+
+	count = 0;
+	for (int i = 1; i < nextPow2; i++)
+	{
+		if (output[i] == 1)
+		{
+			count++;
+		}
+	}
+	output[0] = (count % 2);
+
+	for (int i = 0; i < nextPow2; i++)
+	{
+		printf("%i", output[i]);
+		if (i % 32 == 31)
+		{
+			printf("\n");
+		}
+		else if (i % 8 == 7)
+		{
+			printf(" ");
+		}
+	}
+	
+
+	
+	printf("\nFinal Output:\n");
+	for (int i = 0; i < nextPow2; i++)
+	{
+		printf("%i", output[i]);
+	}
 
 
 	printf("\n");
@@ -121,9 +222,3 @@ int LogBaseX(int base, int input)
 {
 	return log10(input) / log10(base);
 }
-
-/*
-TODO: add length bits to output
-TODO: calculate ECC bits
-TODO: check different lengths
-*/
